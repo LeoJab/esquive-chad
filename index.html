@@ -65,16 +65,21 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:re
 .lb div{border-radius:2px}.lb div.you{background:#1a2d3c;border:1px solid var(--hx-gold);color:#f0e6d2}
 .rec{background:linear-gradient(#c8aa6e,#785a28);color:#010a13;border:1px solid #f0e6d2;border-radius:2px;letter-spacing:2px;text-transform:uppercase}
 .mnote{color:#a09b8c}
-#flashBtn{position:absolute;right:max(14px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));width:70px;height:70px;border-radius:4px;border:2px solid var(--hx-gold);background:radial-gradient(circle at 50% 35%,#16627a,#071a2a 75%);color:#f0e6d2;font:900 30px var(--hx-serif);box-shadow:0 0 0 2px #010a13,0 0 16px rgba(10,200,185,.6),inset 0 0 14px rgba(0,0,0,.7);display:grid;place-items:center;cursor:pointer;touch-action:manipulation;overflow:hidden;text-shadow:0 0 10px #0ac8b9}
-#flashBtn b{font-weight:900;margin-top:-8px}
-#flashBtn small{position:absolute;bottom:5px;font-size:10px;font-weight:900;letter-spacing:1px;color:#c8aa6e;text-shadow:none}
-#flashBtn.cd{filter:saturate(.3) brightness(.7);box-shadow:0 0 0 2px #010a13}
-#flashBtn i{position:absolute;left:0;right:0;bottom:0;background:rgba(1,10,19,.72);font-style:normal}
+#skills{position:absolute;right:max(14px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));display:none;gap:12px}
+#skills button{position:relative;width:70px;height:70px;border-radius:4px;border:2px solid var(--hx-gold);background:radial-gradient(circle at 50% 35%,#16627a,#071a2a 75%);color:#f0e6d2;font:900 30px var(--hx-serif);box-shadow:0 0 0 2px #010a13,0 0 16px rgba(10,200,185,.6),inset 0 0 14px rgba(0,0,0,.7);display:grid;place-items:center;cursor:pointer;touch-action:manipulation;overflow:hidden;text-shadow:0 0 10px #0ac8b9}
+#skills b{font-weight:900;margin-top:-8px}
+#skills small{position:absolute;bottom:5px;font-size:10px;font-weight:900;letter-spacing:1px;color:#c8aa6e;text-shadow:none}
+#skills button.cd{filter:saturate(.3) brightness(.7);box-shadow:0 0 0 2px #010a13}
+#skills i{position:absolute;left:0;right:0;bottom:0;background:rgba(1,10,19,.72);font-style:normal}
 .panel{color:#d8d0bd}
 .panel p,.panel .pitch,.panel .ctl,.panel .hint,.panel small,.stat small,.stat div:last-child,.lb h4{color:#a09b8c}
 .lb div{background:#07121d;border:1px solid #2a3a48;color:#f0e6d2}
 .lb div.you{background:#12283a;border:1px solid var(--hx-gold);color:#f0e6d2}
 .panel .muted,.muted{color:#a09b8c;opacity:1}
+#ghostBtn{background:radial-gradient(circle at 50% 35%,#5b4aa0,#140d33 75%)!important}
+#skills button.act{box-shadow:0 0 0 2px #010a13,0 0 24px 4px rgba(160,255,248,.85),inset 0 0 14px rgba(200,255,250,.4);filter:none}
+.krows{display:grid;gap:6px;margin:10px 0}.krow{display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:800;letter-spacing:1px}
+.krow .btn{min-width:150px;font-size:14px;padding:7px 10px}.krow .btn.on{background:linear-gradient(#785a28,#4a3818);color:#f0e6d2;border-color:#c8aa6e}
 
 </style>
 </head>
@@ -86,14 +91,14 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:re
   <div id="target" class="hide"><span></span></div>
   <div id="top"><button class="btn" id="mute" title="Son">🔊</button></div>
   <div id="flash"></div>
-  <div class="hint hide" id="hint"><span>Touche où aller · F / Espace = Flash</span></div>
+  <div class="hint hide" id="hint"><span>Touche où aller · D Flash · F Ghost</span></div>
   <div class="panel" id="menu">
     <div class="title">ESQUIVE<br>CHAD</div>
-    <p class="muted">Contrôle ton champion et esquive les sorts ennemis : skillshots, grappins, lasers, cônes et zones. Clique pour te déplacer, utilise Flash au bon moment et survis le plus longtemps possible !</p>
+    <p class="muted">Contrôle ton champion et esquive les sorts ennemis : skillshots, grappins, lasers, cônes et zones. Clique pour te déplacer, utilise Flash et Ghost au bon moment et survis le plus longtemps possible !</p>
     <div class="modes hide" id="modes"></div><div class="mrecs hide" id="mrecs"></div><div class="mnote hide" id="mnote"></div>
     <div class="row"><div class="stat"><b id="mBest">0</b><small>ton record</small></div><div class="stat"><b id="mHub">–</b><small id="mHubWho">record du hub</small></div></div>
     <button class="btn primary" id="play">▶ Jouer</button>
-    <p class="muted" style="margin-top:8px;font-size:12px">Clique / touche pour te déplacer (maintiens pour suivre) · ZQSD ou flèches · F ou Espace = Flash</p>
+    <p class="muted" style="margin-top:8px;font-size:12px">Clique / touche pour te déplacer · D = Flash · F = Ghost · ⌨ pour changer les touches</p>
     <div class="lb" id="mLb"></div>
   </div>
   <div class="panel hide" id="over">
@@ -224,12 +229,14 @@ let sc=1,dpr=1,ox=0,oy=0;
 function resize(){dpr=Math.min(2,devicePixelRatio||1);const w=innerWidth,h=innerHeight;cv.width=w*dpr|0;cv.height=h*dpr|0;cv.style.width=w+'px';cv.style.height=h+'px';
   sc=Math.min(w/(A+20),h/(A+20));ox=(w-A*sc)/2;oy=(h-A*sc)/2}
 addEventListener('resize',resize);resize();
-const flashBtn=document.createElement('button');flashBtn.id='flashBtn';flashBtn.innerHTML='<b>F</b><small>FLASH</small><i></i>';document.querySelector('.ui').append(flashBtn);
-const R=8,SPEED=215,FLASH_DIST=140,FLASH_CD=7;
+const skills=document.createElement('div');skills.id='skills';
+const mk=(id,name)=>{const b=document.createElement('button');b.id=id;b.innerHTML='<b></b><small>'+name+'</small><i></i>';skills.append(b);return b};
+const flashBtn=mk('flashBtn','FLASH'),ghostBtn=mk('ghostBtn','GHOST');document.querySelector('.ui').append(skills);
+const R=8,SPEED=215,FLASH_DIST=140,FLASH_CD=7,GHOST_T=4,GHOST_CD=20,GHOST_MULT=1.5;
 const snd=(...a)=>{if(CG.state==='play')CG.sfx.tone(...a)};
 const rnd=(a,b)=>a+Math.random()*(b-a),clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 let P,H,t,spawnIn,tgtT,over,dyingT,shake,parts,ripples,lastTen,keys={},ptr=null;
-function newGame(){P={x:A/2,y:A/2,tx:A/2,ty:A/2,vx:0,vy:0,fcd:0,face:1};H=[];t=0;spawnIn=1.1;tgtT=0;over=false;dyingT=0;shake=0;parts=[];ripples=[];lastTen=0;keys={};ptr=null;CG.setScore(0)}
+function newGame(){P={x:A/2,y:A/2,tx:A/2,ty:A/2,vx:0,vy:0,fcd:0,gt:0,gcd:0,face:1};H=[];t=0;spawnIn=1.1;tgtT=0;over=false;dyingT=0;shake=0;parts=[];ripples=[];lastTen=0;keys={};ptr=null;CG.setScore(0)}
 newGame();
 /* ---------- sorts des champions ennemis ---------- */
 const diff=()=>Math.min(1,t/70)+Math.max(0,(t-70)/200); // monte jusqu'à 70 s puis continue doucement
@@ -278,12 +285,12 @@ const hurts=h=>hurtsAt(h,P.x,P.y,h.age);
 function updH(h,dt,quiet){
   h.age+=dt;
   if(!h.fx&&h.age>=h.T){h.fx=1;if(!quiet){
-    if(h.k==='blast'){CG.sfx.noise(0,.3,.8,500);shake=Math.max(shake,5)}
-    else if(h.k==='cone'){CG.sfx.noise(0,.25,.7,700);shake=Math.max(shake,3)}
+    if(h.k==='blast'){CG.sfx.noise(0,.3,.8,500);shake=0}
+    else if(h.k==='cone'){CG.sfx.noise(0,.25,.7,700);shake=0}
     else if(h.k==='line')CG.sfx.tone(900,0,.12,{type:'sawtooth',v:.25,to:300})
     else CG.sfx.tone(h.k==='hook'?240:640,0,.1,{type:'sawtooth',v:.2,to:h.k==='hook'?120:920})}}}
 const alive=h=>(h.k==='bolt'||h.k==='hook')?(h.age-h.T)*h.sp<h.L+40:h.age<h.T+h.hit+.15;
-function die(){over=true;dyingT=0;shake=14;CG.sfx.hit();CG.flash();for(let i=0;i<28;i++)parts.push({x:P.x,y:P.y,vx:rnd(-260,260),vy:rnd(-260,260),l:rnd(.4,.9),m:.9,c:['#0ac8b9','#c8aa6e','#fff','#dc3a2c'][i%4]})}
+function die(){over=true;dyingT=0;shake=0;CG.sfx.hit();CG.flash();for(let i=0;i<28;i++)parts.push({x:P.x,y:P.y,vx:rnd(-260,260),vy:rnd(-260,260),l:rnd(.4,.9),m:.9,c:['#0ac8b9','#c8aa6e','#fff','#dc3a2c'][i%4]})}
 /* ---------- commandes ---------- */
 function toArena(e){return{x:(e.clientX-ox)/sc,y:(e.clientY-oy)/sc}}
 function setTarget(p){P.tx=clamp(p.x,R,A-R);P.ty=clamp(p.y,R,A-R);ripples.push({x:P.tx,y:P.ty,l:.45,m:.45})}
@@ -291,9 +298,20 @@ cv.addEventListener('contextmenu',e=>e.preventDefault());
 cv.addEventListener('pointerdown',e=>{if(CG.state!=='play'||over)return;e.preventDefault();ptr=e.pointerId;setTarget(toArena(e))});
 addEventListener('pointermove',e=>{if(ptr===e.pointerId&&CG.state==='play'&&!over){const p=toArena(e);P.tx=clamp(p.x,R,A-R);P.ty=clamp(p.y,R,A-R)}});
 addEventListener('pointerup',e=>{if(ptr===e.pointerId)ptr=null});
-const MAP={KeyW:'u',KeyZ:'u',ArrowUp:'u',KeyS:'d',ArrowDown:'d',KeyA:'l',KeyQ:'l',ArrowLeft:'l',KeyD:'r',ArrowRight:'r'};
-addEventListener('keydown',e=>{if(MAP[e.code]){keys[MAP[e.code]]=1;if(CG.state==='play')e.preventDefault()}if((e.code==='KeyF'||e.code==='ShiftLeft')&&CG.state==='play')doFlash();if(e.code==='Space'&&CG.state==='play'){e.preventDefault();doFlash()}});
-addEventListener('keyup',e=>{if(MAP[e.code])keys[MAP[e.code]]=0});
+/* ---------- touches (modifiables) ---------- */
+const DEF={up:'ArrowUp',down:'ArrowDown',left:'ArrowLeft',right:'ArrowRight',flash:'d',ghost:'f'};
+const LAB={up:'Haut',down:'Bas',left:'Gauche',right:'Droite',flash:'Flash',ghost:'Ghost'};
+const DIRK={up:'u',down:'d',left:'l',right:'r'};
+let BIND=Object.assign({},DEF),rebinding=null;
+try{const sv=JSON.parse(localStorage.getItem('esquivechad.keys')||'null');if(sv)for(const k in DEF)if(typeof sv[k]==='string'&&sv[k])BIND[k]=sv[k]}catch(e){}
+const saveBind=()=>{try{localStorage.setItem('esquivechad.keys',JSON.stringify(BIND))}catch(e){}};
+const nk=e=>e.key.length===1?e.key.toLowerCase():e.key;
+const kname=k=>({' ':'Espace',ArrowUp:'↑',ArrowDown:'↓',ArrowLeft:'←',ArrowRight:'→',Shift:'Maj',Control:'Ctrl',Enter:'Entrée',Tab:'Tab',Alt:'Alt'}[k]||(k.length===1?k.toUpperCase():k));
+addEventListener('keydown',e=>{if(rebinding)return;const k=nk(e);
+  for(const a in DIRK)if(BIND[a]===k){keys[DIRK[a]]=1;if(CG.state==='play')e.preventDefault()}
+  if(CG.state!=='play')return;
+  if(k===BIND.flash){e.preventDefault();doFlash()}else if(k===BIND.ghost){e.preventDefault();doGhost()}});
+addEventListener('keyup',e=>{const k=nk(e);for(const a in DIRK)if(BIND[a]===k)keys[DIRK[a]]=0});
 function doFlash(){
   if(CG.state!=='play'||over||P.fcd>0)return;
   let dx=P.tx-P.x,dy=P.ty-P.y;if(keys.l||keys.r||keys.u||keys.d){dx=(keys.r?1:0)-(keys.l?1:0);dy=(keys.d?1:0)-(keys.u?1:0)}
@@ -302,16 +320,45 @@ function doFlash(){
   P.x=clamp(P.x+dx*FLASH_DIST,R,A-R);P.y=clamp(P.y+dy*FLASH_DIST,R,A-R);P.tx=P.x;P.ty=P.y;P.fcd=FLASH_CD;
   for(let i=0;i<14;i++)parts.push({x:P.x,y:P.y,vx:rnd(-90,90),vy:rnd(-90,90),l:.35,m:.35,c:'#ffd426'});
   CG.sfx.tone(500,0,.18,{type:'triangle',v:.4,to:1400})}
+function doGhost(){
+  if(CG.state!=='play'||over||P.gcd>0)return;
+  P.gt=GHOST_T;P.gcd=GHOST_CD;
+  for(let i=0;i<16;i++)parts.push({x:P.x,y:P.y,vx:rnd(-120,120),vy:rnd(-120,120),l:.45,m:.45,c:i%2?'#9ff5ee':'#fff'});
+  CG.sfx.tone(300,0,.25,{type:'sine',v:.35,to:900})}
 flashBtn.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();doFlash()});
+ghostBtn.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();doGhost()});
+/* ---------- menu des touches ---------- */
+const kbBtn=document.createElement('button');kbBtn.className='btn';kbBtn.title='Touches';kbBtn.textContent='⌨';$('top').append(kbBtn);
+const kp=document.createElement('div');kp.className='panel hide';kp.id='keysPanel';kp.style.zIndex=9;document.querySelector('.ui').append(kp);
+function labels(){
+  flashBtn.firstChild.textContent=kname(BIND.flash);ghostBtn.firstChild.textContent=kname(BIND.ghost);
+  const h=$('hint');if(h&&h.firstChild)h.firstChild.textContent='Touche où aller · '+kname(BIND.flash)+' Flash · '+kname(BIND.ghost)+' Ghost';
+  const c=document.querySelectorAll('#menu p.muted')[1];if(c)c.textContent='Clique / touche pour te déplacer (maintiens pour suivre) · '+kname(BIND.flash)+' = Flash · '+kname(BIND.ghost)+' = Ghost · ⌨ pour changer les touches'}
+function renderKeys(){
+  kp.innerHTML='<div class="title" style="font-size:30px">TOUCHES</div><div class="krows"></div><p class="muted" style="font-size:12px;margin:8px 0">Clique sur une touche, puis appuie sur la nouvelle. Échap = annuler.</p><button class="btn" id="kReset">Réinitialiser</button> <button class="btn primary" id="kClose" style="font-size:16px;padding:9px 22px">OK</button>';
+  const box=kp.querySelector('.krows');
+  for(const a in LAB){const r=document.createElement('div');r.className='krow';r.innerHTML='<span>'+LAB[a]+'</span>';const b=document.createElement('button');b.className='btn'+(rebinding===a?' on':'');b.textContent=rebinding===a?'Appuie sur une touche…':kname(BIND[a]);b.onclick=ev=>{ev.stopPropagation();rebinding=a;renderKeys()};r.append(b);box.append(r)}
+  $('kReset').onclick=()=>{BIND=Object.assign({},DEF);rebinding=null;saveBind();renderKeys();labels()};
+  $('kClose').onclick=()=>{rebinding=null;(kp.classList.add('hide'),['menu','over'].forEach(i=>$(i).style.visibility=''))}}
+kbBtn.addEventListener('click',e=>{e.stopPropagation();keys={};rebinding=null;renderKeys();kp.classList.remove('hide');['menu','over'].forEach(i=>$(i).style.visibility='hidden')});
+addEventListener('keydown',e=>{
+  if(kp.classList.contains('hide'))return;
+  e.preventDefault();e.stopImmediatePropagation();
+  if(e.key==='Escape'){if(rebinding)rebinding=null;else (kp.classList.add('hide'),['menu','over'].forEach(i=>$(i).style.visibility=''));renderKeys();return}
+  if(!rebinding||e.key==='Dead'||e.key==='Unidentified')return;
+  const k=nk(e);for(const a in BIND)if(a!==rebinding&&BIND[a]===k)BIND[a]=BIND[rebinding]; // échange si déjà prise
+  BIND[rebinding]=k;rebinding=null;saveBind();renderKeys();labels()},true);
+labels();
 /* ---------- simulation (pas fixe de 1/60 s) ---------- */
 function step(dt){
   if(over){dyingT+=dt;shake*=.9;return}
-  t+=dt;P.fcd=Math.max(0,P.fcd-dt);
+  t+=dt;P.fcd=Math.max(0,P.fcd-dt);P.gcd=Math.max(0,P.gcd-dt);P.gt=Math.max(0,P.gt-dt);const SPD=SPEED*(P.gt>0?GHOST_MULT:1);
   // déplacement : clavier, sinon vers la cible
   let mx=(keys.r?1:0)-(keys.l?1:0),my=(keys.d?1:0)-(keys.u?1:0),ox0=P.x,oy0=P.y;
-  if(mx||my){const n=Math.hypot(mx,my);P.x+=mx/n*SPEED*dt;P.y+=my/n*SPEED*dt;P.tx=P.x;P.ty=P.y}
-  else{const dx=P.tx-P.x,dy=P.ty-P.y,d=Math.hypot(dx,dy);if(d>2){const s=Math.min(d,SPEED*dt);P.x+=dx/d*s;P.y+=dy/d*s}}
+  if(mx||my){const n=Math.hypot(mx,my);P.x+=mx/n*SPD*dt;P.y+=my/n*SPD*dt;P.tx=P.x;P.ty=P.y}
+  else{const dx=P.tx-P.x,dy=P.ty-P.y,d=Math.hypot(dx,dy);if(d>2){const s=Math.min(d,SPD*dt);P.x+=dx/d*s;P.y+=dy/d*s}}
   P.x=clamp(P.x,R,A-R);P.y=clamp(P.y,R,A-R);P.vx=(P.x-ox0)/dt;P.vy=(P.y-oy0)/dt;if(Math.abs(P.vx)>20)P.face=Math.sign(P.vx);
+  if(P.gt>0&&Math.random()<.6)parts.push({x:P.x,y:P.y,vx:rnd(-20,20),vy:rnd(-20,20),l:.3,m:.3,c:'#9ff5ee'});
   spawnIn-=dt;if(spawnIn<=0)spawn();
   for(const h of H){updH(h,dt);if(!over&&hurts(h)){die();return}}
   H=H.filter(alive);
@@ -403,6 +450,7 @@ function drawFloor(){
 }
 function drawChampion(){
   const x=P.x,y=P.y,now=performance.now()/1000;
+  if(P.gt>0){const pu=.5+.5*Math.sin(now*14),gg=ctx.createRadialGradient(x,y,4,x,y,34);gg.addColorStop(0,'rgba(200,255,250,.55)');gg.addColorStop(1,'rgba(10,200,185,0)');ctx.fillStyle=gg;ctx.beginPath();ctx.arc(x,y,34+pu*3,0,7);ctx.fill();ctx.strokeStyle='rgba(220,255,252,.75)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,22+pu*2,0,7);ctx.stroke()}
   // anneau de sélection (vert) + ombre
   ctx.strokeStyle='rgba(60,224,143,.85)';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(x,y+3,20,15,0,0,7);ctx.stroke();
   ctx.fillStyle='rgba(60,224,143,.10)';ctx.fill();
@@ -433,6 +481,7 @@ function draw(){
   ctx.restore();
   // bouton Flash : recharge
   const cd=P?P.fcd/FLASH_CD:0;flashBtn.classList.toggle('cd',cd>0);flashBtn.lastChild.style.height=(cd*100)+'%';
+  const gc=P?P.gcd/GHOST_CD:0;ghostBtn.classList.toggle('cd',gc>0&&P.gt<=0);ghostBtn.classList.toggle('act',!!P&&P.gt>0);ghostBtn.lastChild.style.height=(gc*100)+'%';
 }
 /* ---------- boucle ---------- */
 let last=performance.now(),acc=0,sent=false;
@@ -443,7 +492,7 @@ function frame(now){
   else{acc=0;if(CG.state==='menu')idle(dt)}
   for(const p of parts){p.x+=p.vx*dt;p.y+=p.vy*dt;p.l-=dt}parts=parts.filter(p=>p.l>0);
   for(const r of ripples)r.l-=dt;ripples=ripples.filter(r=>r.l>0);
-  flashBtn.style.display=CG.state==='play'?'grid':'none';
+  skills.style.display=CG.state==='play'?'flex':'none';kbBtn.style.display=CG.state==='play'?'none':'';
   draw();requestAnimationFrame(frame)}
 // animation d'attente derrière les menus : quelques compétences pour l'ambiance
 let idleT=0;function idle(dt){idleT-=dt;if(idleT<=0){idleT=1.1;if(H.length>4)H=H.slice(-3);const sv=t;t=3;const r=Math.random();if(r<.35)spawnBolt(.2);else if(r<.55)spawnLaser(.2);else if(r<.8)spawnCone(.2);else spawnBlast(.2);t=sv}
