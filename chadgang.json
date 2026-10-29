@@ -1,0 +1,10 @@
+{
+  "title": "Esquive Chad",
+  "description": "Contrôle un champion et esquive les sorts ennemis (skillshots, grappins, lasers, zones). Le plus long survivant de la bande gagne.",
+  "author": "ChadGang",
+  "category": "Solo",
+  "emoji": "⚔️",
+  "image": "cover.png",
+  "classement": "score",
+  "unite": "s"
+}
